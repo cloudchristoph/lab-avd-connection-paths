@@ -1,0 +1,39 @@
+# Copy to terraform.tfvars and fill in. terraform.tfvars is in .gitignore: keep your IDs out of Git.
+
+subscription_id = "00000000-0000-0000-0000-000000000000"
+
+# name     = "avd-demo"            # rg-avd-demo, vnet-avd-demo, vdpool-avd-demo, vm-avd-demo-01
+# location = "germanywestcentral"
+# avd_metadata_location = "westeurope"
+
+vnet_address_space = "10.20.0.0/24"
+
+# firewall | natgw | direct. Restart the session hosts after every switch (part 3, trap 2).
+egress_mode = "firewall"
+
+# Existing hub (needed for egress_mode = firewall and for the on-prem path).
+hub_virtual_network_id  = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-hub/providers/Microsoft.Network/virtualNetworks/vnet-hub"
+hub_has_vpn_gateway     = true
+hub_firewall_private_ip = "10.0.0.4"
+onprem_address_space    = "192.168.0.0/24"
+
+# Optional: let this stack add the AVD rule collection group to the hub's firewall policy.
+# firewall_policy_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-hub/providers/Microsoft.Network/firewallPolicies/afwp-hub"
+
+# Optional: existing Log Analytics workspace. Leave unset to create law-<name>.
+# log_analytics_workspace_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-management/providers/Microsoft.OperationalInsights/workspaces/law-management"
+
+# Entra ID
+avd_user_group_object_id        = "00000000-0000-0000-0000-000000000000" # group with the lab users
+avd_service_principal_object_id = "00000000-0000-0000-0000-000000000000" # az ad sp show --id 9cdead84-a844-4324-93f2-b2e6bb768d07 --query id -o tsv
+# avd_admin_group_object_id     = "00000000-0000-0000-0000-000000000000"
+
+# Switches from the series
+# avd_traffic_bypasses_firewall = false   # part 3, trap 3 (adds a NAT gateway)
+# block_turn_udp                = false   # part 3, trap 1 (blocks STUN and TURN)
+# shortpath = {                           # part 2
+#   managed     = "Enabled"
+#   public_stun = "Enabled"
+#   public_turn = "Enabled"
+# }
+# session_host_count = 1

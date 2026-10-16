@@ -1,0 +1,23 @@
+// What Azure Firewall saw from (and to) the session hosts, grouped by rule.
+//
+// Related: "AVD connection paths, part 3: firewall rules, NAT and three traps" and part 6, section "Firewall logs: who checks whom"
+//          https://cloudchristoph.com/articles/avd-connection-paths-3-firewall-rules-nat-traps/
+//          https://cloudchristoph.com/articles/avd-connection-paths-6-reading-the-logs/
+//
+// Needs the firewall's resource-specific (structured) logs: AZFWNetworkRule, AZFWApplicationRule.
+// Only relevant while the session hosts egress through the firewall (egress_mode = "firewall").
+// Denies sort to the top: that is the "forgot an endpoint" moment.
+//
+// Set hosts to the start of your session host subnet (string prefix match, e.g. "10.20.0.").
+// Keep the time window short: the session host talks to STUN and TURN on UDP 3478 all the time,
+// even without sessions, so a wide window is mostly noise.
+
+let hosts = "10.20.0.";
+union
+    (AZFWNetworkRule     | where SourceIp startswith hosts or DestinationIp startswith hosts
+                         | project TimeGenerated, Kind = "net", Action, RuleCollection, Rule, SourceIp, DestinationIp, DestinationPort, Protocol, Target = DestinationIp),
+    (AZFWApplicationRule | where SourceIp startswith hosts
+                         | project TimeGenerated, Kind = "app", Action, RuleCollection, Rule, SourceIp, DestinationIp = "", DestinationPort, Protocol, Target = Fqdn)
+| where TimeGenerated > ago(30m)
+| summarize Hits = count(), Last = max(TimeGenerated) by Action, Kind, RuleCollection, Rule, Target, DestinationPort, Protocol
+| order by Action asc, Hits desc

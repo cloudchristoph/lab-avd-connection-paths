@@ -1,0 +1,19 @@
+// AVD agent health: status changes per session host only.
+//
+// Source: "AVD connection paths, part 6: reading the logs without being fooled"
+//         https://cloudchristoph.com/articles/avd-connection-paths-6-reading-the-logs/
+// Background: part 3, "Trap 2: changing the egress breaks the AVD agent"
+//         https://cloudchristoph.com/articles/avd-connection-paths-3-firewall-rules-nat-traps/
+//
+// WVDAgentHealthStatus writes a row about every 30 seconds; this keeps only the rows where the
+// status changes, so an egress switch shows up as a short Unavailable phase.
+// LastHeartBeat only moves when the status changes, so don't use it as a liveness signal.
+// The real outage after a network change (failing connects for several minutes) shows up in
+// WVDErrors and in connections that never reach Connected, not in this table.
+
+WVDAgentHealthStatus
+| where TimeGenerated > ago(1d)
+| sort by SessionHostName asc, TimeGenerated asc
+| extend PrevStatus = prev(Status), PrevHost = prev(SessionHostName)
+| where Status != PrevStatus or SessionHostName != PrevHost   // status changes only
+| project TimeGenerated, SessionHostName, Status, EndpointState, LastHeartBeat, ActiveSessions

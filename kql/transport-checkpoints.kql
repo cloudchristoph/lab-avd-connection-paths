@@ -1,0 +1,18 @@
+// The RDP Shortpath negotiation of ONE session, step by step.
+//
+// Related: "AVD connection paths, part 6", sections on checkpoints and candidates
+//          https://cloudchristoph.com/articles/avd-connection-paths-6-reading-the-logs/
+//
+// Lists all checkpoints and errors of one connection in time order: TransportTypeSelection,
+// ShortpathPublicLocalCandidatesReady (the session host's ICE candidates in Parameters),
+// ShortpathEstablished (initialUdpType), GatewayTransportReplacedByShortpath,
+// ShortpathFallbackToGatewayTransport (FallbackReason), plus anything from WVDErrors.
+//
+// Replace <CorrelationId> with the Activity ID from the client's Connection Information dialog,
+// or with a CorrelationId from session-classification.kql.
+
+let id = "<CorrelationId>";
+union
+    (WVDCheckpoints | where CorrelationId == id | project TimeGenerated, Kind = "checkpoint", Name, Source, Detail = tostring(Parameters)),
+    (WVDErrors      | where CorrelationId == id | project TimeGenerated, Kind = "error", Name = CodeSymbolic, Source, Detail = Message)
+| order by TimeGenerated asc

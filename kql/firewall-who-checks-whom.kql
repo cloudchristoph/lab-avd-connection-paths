@@ -1,0 +1,27 @@
+// Who checks whom? RDP Shortpath UDP between clients and one session host, as Azure Firewall saw it.
+//
+// Source: "AVD connection paths, part 4: private networks and the Shortpath listener" and part 6, "Firewall logs: who checks whom"
+//         https://cloudchristoph.com/articles/avd-connection-paths-4-private-networks/
+//         https://cloudchristoph.com/articles/avd-connection-paths-6-reading-the-logs/
+//
+// Only useful if the traffic between client and session host passes Azure Firewall (for example a
+// hub firewall between the VPN gateway and the session host spoke).
+// Reading the result:
+//   first row from client to session host  -> the client sent first (ICE check, or listener on 3390)
+//   only rows from session host to client   -> the client never checked; on a stateful return path
+//                                              nothing will come of the session host's checks
+// Port 3478 (STUN/TURN) is excluded: the session host talks to the relays all the time.
+// Keep the window short, around one connect. Public client addresses are masked in the output.
+
+let sessionHost = "10.20.0.11";                       // private IP of the session host (first host of the Terraform default)
+let fromTime = datetime(2026-10-15 12:00:25);         // example: a few seconds before the connect
+let toTime   = datetime(2026-10-15 12:00:45);         // example: about 40 s later
+AZFWNetworkRule
+| where TimeGenerated between (fromTime .. toTime)
+| where Protocol == "UDP" and (SourceIp == sessionHost or DestinationIp == sessionHost)
+| where DestinationPort != 3478
+| extend Direction = iff(SourceIp == sessionHost, "host -> client", "client -> host")
+| extend Peer = iff(SourceIp == sessionHost, DestinationIp, SourceIp)
+| extend Peer = case(ipv4_is_private(Peer), Peer, Peer startswith "51.5.", strcat(Peer, " (relay)"), "<public>")
+| project TimeGenerated, Direction, Peer, DestinationPort, Action, RuleCollection
+| order by TimeGenerated asc

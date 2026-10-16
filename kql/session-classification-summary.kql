@@ -1,0 +1,43 @@
+// Session classification, summarized: how many sessions per client type took which path.
+//
+// Source: "AVD connection paths, part 6: reading the logs without being fooled"
+//         https://cloudchristoph.com/articles/avd-connection-paths-6-reading-the-logs/
+//
+// This is session-classification.kql with the summary lines from the article appended
+// instead of its last two lines (project / order by). It gives the picture from part 1
+// for a whole user base: which clients go direct, which use the relay, which never get UDP.
+// Watch the bucket "TCP: candidates ready, UDP never came up": the session host was ready,
+// nothing failed, and the session still stayed on TCP.
+
+let lookback = 1d;
+let connections = WVDConnections
+    | where TimeGenerated > ago(lookback)
+    | summarize
+        Started = minif(TimeGenerated, State == "Started"),
+        FinalTransport = take_anyif(TransportType, State == "Completed"),
+        UserName = take_any(UserName),
+        ClientType = take_any(ClientType),
+        ClientVersion = take_any(ClientVersion),
+        SessionHostName = take_any(SessionHostName)
+        by CorrelationId;
+let shortpath = WVDCheckpoints
+    | where TimeGenerated > ago(lookback)
+    | where Name in ("ShortpathEstablished", "ShortpathFallbackToGatewayTransport", "ShortpathPublicLocalCandidatesReady")
+    | summarize
+        UdpType = take_anyif(tostring(Parameters.initialUdpType), Name == "ShortpathEstablished"),
+        FallbackReason = take_anyif(tostring(Parameters.FallbackReason), Name == "ShortpathFallbackToGatewayTransport"),
+        CandidateRows = countif(Name == "ShortpathPublicLocalCandidatesReady")
+        by CorrelationId;
+connections
+| join kind=leftouter shortpath on CorrelationId
+| extend Path = case(
+    UdpType == "ShortpathPrivate" or FinalTransport == "ShortpathPrivate", "UDP private (listener)",
+    UdpType == "Shortpath_Relayed_UDP" or FinalTransport == "TURN Relay", "UDP via TURN relay",
+    UdpType in ("Shortpath_Direct_UDP", "Shortpath_UDP_over_NAT") or FinalTransport == "ShortpathPublic", "UDP direct (STUN or private ICE)",
+    FallbackReason == "NotSupported", "TCP: client did not offer UDP",
+    UdpType == "Unknown" or FinalTransport == "Multipath", "Unclear (Multipath, check the session host)",
+    CandidateRows > 0 and isempty(UdpType), "TCP: candidates ready, UDP never came up",
+    isempty(FinalTransport), "Still running or no data",
+    "TCP")
+| summarize Sessions = count() by ClientType, Path
+| order by ClientType asc, Sessions desc

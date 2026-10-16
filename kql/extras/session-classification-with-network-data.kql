@@ -1,0 +1,48 @@
+// Optional variant of kql/session-classification.kql (part 6 of the blog series
+// "AVD connection paths"): same buckets, plus client IP and the average RTT and
+// bandwidth from WVDConnectionNetworkData per session.
+//
+// Careful: the network data values are estimates over two-minute intervals and were
+// far below what the client's Connection Information dialog showed in my lab. Use them
+// for trends, not for a side-by-side comparison with the client (see part 6).
+// Data arrives with a delay of up to about 15 minutes, network data even later.
+let lookback = 1d;
+let connections = WVDConnections
+    | where TimeGenerated > ago(lookback)
+    // | where _ResourceId has "<your-host-pool-name>"   // optional: limit to one host pool
+    | summarize
+        Started = minif(TimeGenerated, State == "Started"),
+        FinalTransport = take_anyif(TransportType, State == "Completed"),
+        UserName = take_any(UserName),
+        ClientType = take_any(ClientType),
+        ClientVersion = take_any(ClientVersion),
+        ClientSideIPAddress = take_any(ClientSideIPAddress),
+        SessionHostName = take_any(SessionHostName)
+        by CorrelationId;
+let shortpath = WVDCheckpoints
+    | where TimeGenerated > ago(lookback)
+    | where Name in ("ShortpathEstablished", "ShortpathFallbackToGatewayTransport", "ShortpathPublicLocalCandidatesReady")
+    | summarize
+        UdpType = take_anyif(tostring(Parameters.initialUdpType), Name == "ShortpathEstablished"),
+        FallbackReason = take_anyif(tostring(Parameters.FallbackReason), Name == "ShortpathFallbackToGatewayTransport"),
+        CandidateRows = countif(Name == "ShortpathPublicLocalCandidatesReady")
+        by CorrelationId;
+let net = WVDConnectionNetworkData
+    | where TimeGenerated > ago(lookback)
+    | summarize RttMs = round(avg(EstRoundTripTimeInMs), 0),
+                BwMbps = round(avg(EstAvailableBandwidthKBps) * 8 / 1000.0, 1) by CorrelationId;  // KBps (kilobytes) to Mbps (megabits)
+connections
+| join kind=leftouter shortpath on CorrelationId
+| join kind=leftouter net on CorrelationId
+| extend Path = case(
+    UdpType == "ShortpathPrivate" or FinalTransport == "ShortpathPrivate", "UDP private (listener)",
+    UdpType == "Shortpath_Relayed_UDP" or FinalTransport == "TURN Relay", "UDP via TURN relay",
+    UdpType in ("Shortpath_Direct_UDP", "Shortpath_UDP_over_NAT") or FinalTransport == "ShortpathPublic", "UDP direct (STUN or private ICE)",
+    FallbackReason == "NotSupported", "TCP: client did not offer UDP",
+    UdpType == "Unknown" or FinalTransport == "Multipath", "Unclear (Multipath, check the session host)",
+    CandidateRows > 0 and isempty(UdpType), "TCP: candidates ready, UDP never came up",
+    isempty(FinalTransport), "Still running or no data",
+    "TCP")
+| project Started, UserName, ClientType, ClientVersion, ClientSideIPAddress, SessionHostName,
+          Path, UdpType, FinalTransport, RttMs, BwMbps, CorrelationId
+| order by Started desc

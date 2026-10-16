@@ -1,0 +1,21 @@
+// All RDP Shortpath checkpoints of one session, in order.
+//
+// Source: "AVD connection paths, part 6: reading the logs without being fooled"
+//         https://cloudchristoph.com/articles/avd-connection-paths-6-reading-the-logs/
+//
+// Copy the Activity ID from the client's Connection Information dialog; it is the CorrelationId.
+// What to look for:
+//   ShortpathRequested (udpPort)            -> the listener path from part 4 was requested
+//   ShortpathEstablished, initialUdpType    -> ShortpathPrivate / Shortpath_Direct_UDP /
+//                                              Shortpath_UDP_over_NAT / Shortpath_Relayed_UDP / Unknown
+//   GatewayTransportReplacedByShortpath     -> the TCP path through the gateway was dropped
+// Checkpoint names are observed, not documented on Learn.
+
+let activityId = "<activity-id>";                     // the first 8 characters are enough
+WVDCheckpoints
+| where CorrelationId startswith activityId
+| where Name startswith "Shortpath" or Name in ("StartOrchestration", "TransportConnected", "TransportTypeSelection", "GatewayTransportReplacedByShortpath")
+| extend Seconds = round(datetime_diff("millisecond", TimeGenerated, toscalar(
+    WVDCheckpoints | where CorrelationId startswith activityId and Name == "StartOrchestration" | summarize min(TimeGenerated))) / 1000.0, 1)
+| project TimeGenerated, Seconds, Source, Name, Parameters
+| order by TimeGenerated asc
