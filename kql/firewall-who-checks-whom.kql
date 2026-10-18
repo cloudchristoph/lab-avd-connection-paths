@@ -1,7 +1,7 @@
 // Who checks whom? RDP Shortpath UDP between clients and one session host, as Azure Firewall saw it.
 //
-// Source: "AVD connection paths, part 4: private networks and the Shortpath listener" and part 6, "Firewall logs: who checks whom"
-//         https://cloudchristoph.com/articles/avd-connection-paths-4-private-networks/
+// Source: "AVD connection paths, part 4: why RDP Shortpath over private networks is luck, and a fix" and part 6, "Firewall logs: who checks whom"
+//         https://cloudchristoph.com/articles/avd-connection-paths-4-shortpath-over-private-networks/
 //         https://cloudchristoph.com/articles/avd-connection-paths-6-reading-the-logs/
 //
 // Only useful if the traffic between client and session host passes Azure Firewall (for example a
