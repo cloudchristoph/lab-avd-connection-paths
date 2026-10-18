@@ -1,7 +1,7 @@
 // What Azure Firewall saw from (and to) the session hosts, grouped by rule.
 //
-// Related: "AVD connection paths, part 3: firewall rules, NAT and three traps" and part 6, section "Firewall logs: who checks whom"
-//          https://cloudchristoph.com/articles/avd-connection-paths-3-firewall-rules-nat-traps/
+// Related: "AVD connection paths, part 3: the firewall rules you need, the ones you don't, and three traps" and part 6, section "Firewall logs: who checks whom"
+//          https://cloudchristoph.com/articles/avd-connection-paths-3-firewall-rules-and-three-traps/
 //          https://cloudchristoph.com/articles/avd-connection-paths-6-reading-the-logs/
 //
 // Needs the firewall's resource-specific (structured) logs: AZFWNetworkRule, AZFWApplicationRule.

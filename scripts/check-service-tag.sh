@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # check-service-tag.sh: does the service tag WindowsVirtualDesktop contain the TURN range?
 #
-# Optional helper, related to "AVD connection paths, part 3: firewall rules, NAT and three traps"
-#   https://cloudchristoph.com/articles/avd-connection-paths-3-firewall-rules-nat-traps/
+# Optional helper, related to "AVD connection paths, part 3: the firewall rules you need, the ones you don't, and three traps"
+#   https://cloudchristoph.com/articles/avd-connection-paths-3-firewall-rules-and-three-traps/
 #
 # Lists the prefixes of the service tag in a region and checks for 51.5.0.0/16 (STUN and TURN
 # relays) and leftovers of the old range 20.202.0.0/16. The tag changes without notice: run it

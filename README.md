@@ -15,9 +15,9 @@ what firewalls, NAT and logs have to do with it.
 
 1. [Part 1: the client decides which path you get](https://cloudchristoph.com/articles/avd-connection-paths-1-the-client-decides/)
 2. [Part 2: what the AVD settings really do to the path](https://cloudchristoph.com/articles/avd-connection-paths-2-what-avd-settings-do/)
-3. [Part 3: firewall rules, NAT and three traps](https://cloudchristoph.com/articles/avd-connection-paths-3-firewall-rules-nat-traps/)
-4. [Part 4: private networks and the Shortpath listener](https://cloudchristoph.com/articles/avd-connection-paths-4-private-networks/)
-5. [Part 5: what sign-in and profiles need from the network](https://cloudchristoph.com/articles/avd-connection-paths-5-sign-in-and-profiles/)
+3. [Part 3: the firewall rules you need, the ones you don't, and three traps](https://cloudchristoph.com/articles/avd-connection-paths-3-firewall-rules-and-three-traps/)
+4. [Part 4: why RDP Shortpath over private networks is luck, and a fix](https://cloudchristoph.com/articles/avd-connection-paths-4-shortpath-over-private-networks/)
+5. [Part 5: the join type decides your sign-in firewall rules](https://cloudchristoph.com/articles/avd-connection-paths-5-join-type-and-sign-in-rules/)
 6. [Part 6: reading the logs without being fooled](https://cloudchristoph.com/articles/avd-connection-paths-6-reading-the-logs/)
 7. [The checklist](https://cloudchristoph.com/articles/avd-connection-paths-checklist/)
 
@@ -49,7 +49,7 @@ dashboard on them.
 
 ## Lab topology
 
-As described in [part 3, "The lab"](https://cloudchristoph.com/articles/avd-connection-paths-3-firewall-rules-nat-traps/#the-lab):
+As described in [part 3, "The lab"](https://cloudchristoph.com/articles/avd-connection-paths-3-firewall-rules-and-three-traps/#the-lab):
 
 - **Session host:** Windows 11 Enterprise multi-session 24H2, Entra joined, in a spoke VNet.
   Default route `0.0.0.0/0` to an Azure Firewall (Premium in my lab) in the hub.
@@ -153,7 +153,7 @@ terraform -chdir=terraform apply -var 'shortpath={managed="Enabled",public_stun=
 ```
 
 **Restart the session hosts after every egress change** before you test. Otherwise you measure
-the AVD agent recovering, not the network ([part 3, trap 2](https://cloudchristoph.com/articles/avd-connection-paths-3-firewall-rules-nat-traps/#trap-2-changing-the-egress-breaks-the-avd-agent)).
+the AVD agent recovering, not the network ([part 3, trap 2](https://cloudchristoph.com/articles/avd-connection-paths-3-firewall-rules-and-three-traps/#trap-2-changing-the-egress-breaks-the-avd-agent)).
 
 ## Tear down
 

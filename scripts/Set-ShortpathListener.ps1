@@ -1,8 +1,8 @@
 <#
   Enables the RDP Shortpath listener for managed networks on a session host: the host listens on
   UDP 3390 (all addresses) and the Windows Firewall lets the on-prem / VPN client networks in.
-  Lab shortcut for "AVD connection paths, part 4: private networks and the Shortpath listener"
-  (https://cloudchristoph.com/articles/avd-connection-paths-4-private-networks/).
+  Lab shortcut for "AVD connection paths, part 4: why RDP Shortpath over private networks is luck, and a fix"
+  (https://cloudchristoph.com/articles/avd-connection-paths-4-shortpath-over-private-networks/).
   Runs as SYSTEM, for example through az vm run-command; idempotent.
 
   The official way is the policy "Enable RDP Shortpath for managed networks" through Intune or

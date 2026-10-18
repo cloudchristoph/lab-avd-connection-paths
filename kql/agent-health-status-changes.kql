@@ -3,7 +3,7 @@
 // Source: "AVD connection paths, part 6: reading the logs without being fooled"
 //         https://cloudchristoph.com/articles/avd-connection-paths-6-reading-the-logs/
 // Background: part 3, "Trap 2: changing the egress breaks the AVD agent"
-//         https://cloudchristoph.com/articles/avd-connection-paths-3-firewall-rules-nat-traps/
+//         https://cloudchristoph.com/articles/avd-connection-paths-3-firewall-rules-and-three-traps/
 //
 // WVDAgentHealthStatus writes a row about every 30 seconds; this keeps only the rows where the
 // status changes, so an egress switch shows up as a short Unavailable phase.
