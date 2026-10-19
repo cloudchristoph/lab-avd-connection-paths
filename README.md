@@ -13,13 +13,15 @@ what firewalls, NAT and logs have to do with it.
 
 ## The series
 
-1. [Part 1: the client decides which path you get](https://cloudchristoph.com/articles/avd-connection-paths-1-the-client-decides/)
-2. [Part 2: what the AVD settings really do to the path](https://cloudchristoph.com/articles/avd-connection-paths-2-what-avd-settings-do/)
-3. [Part 3: the firewall rules you need, the ones you don't, and three traps](https://cloudchristoph.com/articles/avd-connection-paths-3-firewall-rules-and-three-traps/)
-4. [Part 4: why RDP Shortpath over private networks is luck, and a fix](https://cloudchristoph.com/articles/avd-connection-paths-4-shortpath-over-private-networks/)
-5. [Part 5: the join type decides your sign-in firewall rules](https://cloudchristoph.com/articles/avd-connection-paths-5-join-type-and-sign-in-rules/)
-6. [Part 6: reading the logs without being fooled](https://cloudchristoph.com/articles/avd-connection-paths-6-reading-the-logs/)
-7. [The checklist](https://cloudchristoph.com/articles/avd-connection-paths-checklist/)
+Publication dates are listed until the series is complete. Parts dated in the future are not online yet.
+
+1. [Part 1: the client decides which path you get](https://cloudchristoph.com/articles/avd-connection-paths-1-the-client-decides/) (19 Oct 2026)
+2. [Part 2: what the AVD settings really do to the path](https://cloudchristoph.com/articles/avd-connection-paths-2-what-avd-settings-do/) (21 Oct 2026)
+3. [Part 3: the firewall rules you need, the ones you don't, and three traps](https://cloudchristoph.com/articles/avd-connection-paths-3-firewall-rules-and-three-traps/) (22 Oct 2026)
+4. [Part 4: why RDP Shortpath over private networks is luck, and a fix](https://cloudchristoph.com/articles/avd-connection-paths-4-shortpath-over-private-networks/) (27 Oct 2026)
+5. [Part 5: the join type decides your sign-in firewall rules](https://cloudchristoph.com/articles/avd-connection-paths-5-join-type-and-sign-in-rules/) (29 Oct 2026)
+6. [Part 6: reading the logs without being fooled](https://cloudchristoph.com/articles/avd-connection-paths-6-reading-the-logs/) (3 Nov 2026)
+7. [The checklist](https://cloudchristoph.com/articles/avd-connection-paths-checklist/) (5 Nov 2026)
 
 ## What's in here
 
